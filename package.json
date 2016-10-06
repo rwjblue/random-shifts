@@ -1,0 +1,11 @@
+{
+  "name": "random-shifts",
+  "version": "1.0.0",
+  "description": "JSCodeShift Module for replacing imports within an emberjs/ember.js package with relative imports.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Robert Jackson <me@rwjblue.com>",
+  "license": "MIT"
+}
