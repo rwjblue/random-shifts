@@ -10,8 +10,11 @@
   "license": "MIT",
   "devDependencies": {
     "broccoli-test-helper": "^1.2.0",
+    "common-tags": "^1.4.0",
     "eslint-config-prettier": "^2.6.0",
     "eslint-plugin-prettier": "^2.3.1",
+    "execa": "^0.8.0",
+    "jscodeshift": "^0.3.32",
     "prettier": "^1.7.4",
     "qunit-eslint": "^1.0.0",
     "qunitjs": "^2.4.0"
