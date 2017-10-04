@@ -26,7 +26,7 @@ function buildImportSpecifier(j, importSpecifier) {
 
 function getInfoFromImportSource(input) {
   if (input[0] === '.') {
-  	return { relativePath: input };
+    return { relativePath: input };
   }
 
   let match = input.match(/([^\/]+)(?:\/(.+))?$/);
@@ -38,21 +38,21 @@ function getInfoFromImportSource(input) {
   let relativePath = match[2];
 
   return { packageName, relativePath };
-};
+}
 
 module.exports = function transformer(file, api) {
   const j = api.jscodeshift;
-  const {expression, statement, statements} = j.template;
+  const { expression, statement, statements } = j.template;
   let firstImportByPackage = {};
 
   let source = j(file.source)
     .find(j.ImportDeclaration)
-    .replaceWith((p) => {
+    .replaceWith(p => {
       let importSource = p.node.source.value;
       let { packageName } = getInfoFromImportSource(importSource);
 
       if (!packageName) {
-    	return p.node;
+        return p.node;
       }
 
       let importForPackage = firstImportByPackage[packageName];
@@ -62,17 +62,20 @@ module.exports = function transformer(file, api) {
 
         p.node.specifiers.forEach((importSpecifier, index) => {
           if (importSpecifier.type === 'ImportDefaultSpecifier') {
-            let updatedImportSpecifier = buildImportSpecifier(j, importSpecifier);
+            let updatedImportSpecifier = buildImportSpecifier(
+              j,
+              importSpecifier
+            );
 
             p.node.specifiers.splice(index, 1);
-			      p.node.specifiers.unshift(updatedImportSpecifier);
+            p.node.specifiers.unshift(updatedImportSpecifier);
           }
         });
 
         return p.node;
       }
 
-      p.node.specifiers.forEach((importSpecifier) => {
+      p.node.specifiers.forEach(importSpecifier => {
         let local, imported;
         let updatedImportSpecifier = buildImportSpecifier(j, importSpecifier);
 
@@ -80,30 +83,30 @@ module.exports = function transformer(file, api) {
       });
     })
     .toSource({
-      quote: 'single'
+      quote: 'single',
     });
 
-  return source.replace(/\bimport.+from/g, (importStatement) => {
-
+  return source.replace(/\bimport.+from/g, importStatement => {
     let openCurly = importStatement.indexOf('{');
     let closeCurly = importStatement.indexOf('}');
 
     // leave default only imports alone
-    if (openCurly === -1) { return importStatement; }
+    if (openCurly === -1) {
+      return importStatement;
+    }
 
     if (importStatement.length > 50) {
       // if the segment is > 50 chars make it multi-line
       let result = importStatement.slice(0, openCurly + 1);
       let named = importStatement
-            .slice(openCurly + 1, -6).split(',')
-            .map(name => `\n  ${name.trim()}`);
+        .slice(openCurly + 1, -6)
+        .split(',')
+        .map(name => `\n  ${name.trim()}`);
 
       return result + named.join(',') + '\n} from';
     } else {
       // if the segment is < 50 chars just make sure it has proper spacing
-      return importStatement
-        .replace(/\{\s*/, '{ ')
-        .replace(/\s*\}/, ' }');
+      return importStatement.replace(/\{\s*/, '{ ').replace(/\s*\}/, ' }');
     }
   });
 };

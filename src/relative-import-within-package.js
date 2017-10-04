@@ -4,7 +4,7 @@ const path = require('path');
 
 function getInfoFromImportSource(input) {
   if (input[0] === '.') {
-  	return { relativePath: input };
+    return { relativePath: input };
   }
 
   let match = input.match(/([^\/]+)(?:\/(.+))?$/);
@@ -16,17 +16,19 @@ function getInfoFromImportSource(input) {
   let relativePath = match[2];
 
   return { packageName, relativePath };
-};
+}
 
 module.exports = function transformer(file, api) {
   let j = api.jscodeshift;
-  let {expression, statement, statements} = j.template;
+  let { expression, statement, statements } = j.template;
 
-  let [ , currentPackage, baseDir ] = file.path.match(/^packages\/([^\/]+)\/([^\/]+)/);
+  let [, currentPackage, baseDir] = file.path.match(
+    /^packages\/([^\/]+)\/([^\/]+)/
+  );
 
   return j(file.source)
     .find(j.ImportDeclaration)
-    .replaceWith((p) => {
+    .replaceWith(p => {
       let importSource = p.node.source.value;
       let sourceInfo = getInfoFromImportSource(importSource);
 
@@ -40,11 +42,14 @@ module.exports = function transformer(file, api) {
 
       let includeBaseDir = baseDir === 'lib';
       let from = file.path;
-      let to = `packages/${currentPackage}/${includeBaseDir ? baseDir : ''}/${sourceInfo.relativePath}`;
+      let to = `packages/${currentPackage}/${includeBaseDir
+        ? baseDir
+        : ''}/${sourceInfo.relativePath}`;
 
-      let relativePath = path.relative(from, to)
-            .replace(/^../, '.')
-            .replace('lib/', '');
+      let relativePath = path
+        .relative(from, to)
+        .replace(/^../, '.')
+        .replace('lib/', '');
       relativePath = path.normalize(relativePath);
 
       if (relativePath[0] !== '.') {

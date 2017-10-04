@@ -24,12 +24,12 @@ const utils = [
   'tryInvoke',
   'makeArray',
   'applyStr',
-  'toString'
+  'toString',
 ];
 
 function getInfoFromImportSource(input) {
   if (input[0] === '.') {
-  	return { relativePath: input };
+    return { relativePath: input };
   }
 
   let match = input.match(/([^\/]+)(?:\/(.+))?$/);
@@ -41,7 +41,7 @@ function getInfoFromImportSource(input) {
   let relativePath = match[2];
 
   return { packageName, relativePath };
-};
+}
 
 function spliceSlice(str, index, count, add) {
   // We cannot pass negative indexes dirrectly to the 2nd slicing operation.
@@ -52,18 +52,18 @@ function spliceSlice(str, index, count, add) {
     }
   }
 
-  return str.slice(0, index) + (add || "") + str.slice(index + count);
+  return str.slice(0, index) + (add || '') + str.slice(index + count);
 }
 
 module.exports = function transformer(file, api) {
   const j = api.jscodeshift;
-  const {expression, statement, statements} = j.template;
+  const { expression, statement, statements } = j.template;
   let utilsNeededMap = {};
   let utilsImport;
 
   let source = j(file.source)
     .find(j.ImportDeclaration)
-    .replaceWith((p) => {
+    .replaceWith(p => {
       let importSource = p.node.source.value;
       let { packageName } = getInfoFromImportSource(importSource);
 
@@ -84,38 +84,41 @@ module.exports = function transformer(file, api) {
 
       // remove the existing ember-utils import
       // remove the import if there are no specifiers left
-      if (packageName === 'ember-utils' || (p.node.specifiers.length === 0 && toRemove.length > 0)) {
+      if (
+        packageName === 'ember-utils' ||
+        (p.node.specifiers.length === 0 && toRemove.length > 0)
+      ) {
         return;
       }
 
       return p.node;
     })
     .toSource({
-      quote: 'single'
+      quote: 'single',
     });
 
   // general import formatting
-  source = source.replace(/\bimport.+from/g, (importStatement) => {
-
+  source = source.replace(/\bimport.+from/g, importStatement => {
     let openCurly = importStatement.indexOf('{');
     let closeCurly = importStatement.indexOf('}');
 
     // leave default only imports alone
-    if (openCurly === -1) { return importStatement; }
+    if (openCurly === -1) {
+      return importStatement;
+    }
 
     if (importStatement.length > 50) {
       // if the segment is > 50 chars make it multi-line
       let result = importStatement.slice(0, openCurly + 1);
       let named = importStatement
-            .slice(openCurly + 1, -6).split(',')
-            .map(name => `\n  ${name.trim()}`);
+        .slice(openCurly + 1, -6)
+        .split(',')
+        .map(name => `\n  ${name.trim()}`);
 
       return result + named.join(',') + '\n} from';
     } else {
       // if the segment is < 50 chars just make sure it has proper spacing
-      return importStatement
-        .replace(/\{\s*/, '{ ')
-        .replace(/\s*\}/, ' }');
+      return importStatement.replace(/\{\s*/, '{ ').replace(/\s*\}/, ' }');
     }
   });
 
@@ -141,7 +144,11 @@ module.exports = function transformer(file, api) {
 
     importStatement += `} from 'ember-utils';${trailingWhitespace}`;
 
-    return source.slice(0, firstImportIndex) + importStatement + source.slice(firstImportIndex);
+    return (
+      source.slice(0, firstImportIndex) +
+      importStatement +
+      source.slice(firstImportIndex)
+    );
   } else {
     return source;
   }
