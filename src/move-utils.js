@@ -43,23 +43,9 @@ function getInfoFromImportSource(input) {
   return { packageName, relativePath };
 }
 
-function spliceSlice(str, index, count, add) {
-  // We cannot pass negative indexes dirrectly to the 2nd slicing operation.
-  if (index < 0) {
-    index = str.length + index;
-    if (index < 0) {
-      index = 0;
-    }
-  }
-
-  return str.slice(0, index) + (add || '') + str.slice(index + count);
-}
-
 module.exports = function transformer(file, api) {
   const j = api.jscodeshift;
-  const { expression, statement, statements } = j.template;
   let utilsNeededMap = {};
-  let utilsImport;
 
   let source = j(file.source)
     .find(j.ImportDeclaration)
@@ -100,7 +86,6 @@ module.exports = function transformer(file, api) {
   // general import formatting
   source = source.replace(/\bimport.+from/g, importStatement => {
     let openCurly = importStatement.indexOf('{');
-    let closeCurly = importStatement.indexOf('}');
 
     // leave default only imports alone
     if (openCurly === -1) {

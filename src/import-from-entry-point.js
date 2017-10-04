@@ -42,7 +42,6 @@ function getInfoFromImportSource(input) {
 
 module.exports = function transformer(file, api) {
   const j = api.jscodeshift;
-  const { expression, statement, statements } = j.template;
   let firstImportByPackage = {};
 
   let source = j(file.source)
@@ -76,7 +75,6 @@ module.exports = function transformer(file, api) {
       }
 
       p.node.specifiers.forEach(importSpecifier => {
-        let local, imported;
         let updatedImportSpecifier = buildImportSpecifier(j, importSpecifier);
 
         importForPackage.specifiers.push(updatedImportSpecifier);
@@ -88,7 +86,6 @@ module.exports = function transformer(file, api) {
 
   return source.replace(/\bimport.+from/g, importStatement => {
     let openCurly = importStatement.indexOf('{');
-    let closeCurly = importStatement.indexOf('}');
 
     // leave default only imports alone
     if (openCurly === -1) {
