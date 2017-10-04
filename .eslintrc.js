@@ -5,6 +5,9 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2017,
   },
+  env: {
+    node: true,
+  },
   rules: {
     'prettier/prettier': ['error', { singleQuote: true, trailingComma: 'es5' }],
   },
