@@ -4,7 +4,7 @@
   "description": "JSCodeShift Module for replacing imports within an emberjs/ember.js package with relative imports.",
   "main": "index.js",
   "scripts": {
-    "test": "qunit tests/**/*-test.js"
+    "test": "qunit test/**/*-test.js"
   },
   "author": "Robert Jackson <me@rwjblue.com>",
   "license": "MIT",
