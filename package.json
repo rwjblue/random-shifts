@@ -4,12 +4,16 @@
   "description": "JSCodeShift Module for replacing imports within an emberjs/ember.js package with relative imports.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "qunit tests/**/*-test.js"
   },
   "author": "Robert Jackson <me@rwjblue.com>",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
+    "broccoli-test-helper": "^1.2.0",
     "eslint-config-prettier": "^2.6.0",
-    "eslint-plugin-prettier": "^2.3.1"
+    "eslint-plugin-prettier": "^2.3.1",
+    "prettier": "^1.7.4",
+    "qunit-eslint": "^1.0.0",
+    "qunitjs": "^2.4.0"
   }
 }
