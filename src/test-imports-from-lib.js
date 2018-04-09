@@ -41,7 +41,6 @@ module.exports = function transformer(file, api) {
         !expandedSource.includes(`${currentPackage}/lib`) &&
         !expandedSource.endsWith(currentPackage)
       ) {
-        console.log(expandedSource);
         p.node.source.value = addLibToPath(importSource);
       }
 
