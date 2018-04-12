@@ -5,7 +5,7 @@ const { createTempDir } = require('broccoli-test-helper');
 function setupTransformTest(transformName, hooks) {
   hooks.beforeEach(async function() {
     this.tmpdir = await createTempDir();
-    this.transformPath = path.join(__dirname, '../opt', transformName);
+    this.transformPath = path.join(__dirname, '../src', transformName);
   });
 
   hooks.afterEach(async function() {
