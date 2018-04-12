@@ -20,7 +20,6 @@ function getInfoFromImportSource(input) {
 
 module.exports = function transformer(file, api) {
   let j = api.jscodeshift;
-  let { expression, statement, statements } = j.template;
 
   let [, currentPackage, baseDir] = file.path.match(
     /^packages\/([^\/]+)\/([^\/]+)/
