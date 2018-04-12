@@ -9,6 +9,7 @@
   "author": "Robert Jackson <me@rwjblue.com>",
   "license": "MIT",
   "devDependencies": {
+    "babylon": "^7.0.0-beta.44",
     "broccoli-test-helper": "^1.2.0",
     "common-tags": "^1.4.0",
     "eslint-config-prettier": "^2.6.0",
@@ -17,6 +18,7 @@
     "jscodeshift": "^0.3.32",
     "prettier": "^1.7.4",
     "qunit-eslint": "^1.0.0",
-    "qunitjs": "^2.4.0"
+    "qunitjs": "^2.4.0",
+    "recast": "^0.14.7"
   }
 }

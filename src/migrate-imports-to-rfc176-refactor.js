@@ -25,9 +25,17 @@ const importsToMigrate = [
 const fromModule = 'ember-metal';
 const toModule = '@ember/runloop';
 
+const babylon = require('babylon');
+const recast = require('recast');
 module.exports = function(file, api) {
+  const parse = source =>
+    babylon.parse(source, {
+      sourceType: 'module',
+      plugins: ['typescript'],
+    });
+
   const j = api.jscodeshift;
-  const root = j(file.source);
+  const root = j(recast.parse(file.source, { parser: { parse } }));
   const printOptions = { quote: 'single', wrapColumn: 100 };
 
   function ensureImport(source, anchor, method) {
