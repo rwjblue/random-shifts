@@ -2,28 +2,13 @@
 
 /* globals Set */
 
-const importsToMigrate = [
-  'getCurrentRunLoop',
-  'backburner',
-  'run',
-  'join',
-  'bind',
-  'begin',
-  'end',
-  'schedule',
-  'hasScheduledTimers',
-  'cancelTimers',
-  'later',
-  'once',
-  'scheduleOnce',
-  'next',
-  'cancel',
-  'debounce',
-  'throttle',
-  '_globalsRun',
-];
-const fromModule = 'ember-metal';
-const toModule = '@ember/runloop';
+const importsToMigrate = {
+  Application: 'default',
+  onLoad: 'onLoad',
+  runLoadHooks: 'runLoadHooks',
+};
+const fromModule = 'ember-application';
+const toModule = '@ember/application';
 
 module.exports = function(file, api) {
   const j = api.jscodeshift;
@@ -67,6 +52,7 @@ module.exports = function(file, api) {
     let importStatement = ensureImport(source, anchor, positionMethod);
     let combinedSpecifiers = new Set(specifiers);
 
+    // collect the existing import specifiers
     importStatement
       .find(j.ImportSpecifier)
       .forEach(i =>
@@ -74,16 +60,37 @@ module.exports = function(file, api) {
       )
       .remove();
 
+    // collect the default specifier
+    importStatement
+      .find(j.ImportDefaultSpecifier)
+      .forEach(i => {
+        combinedSpecifiers.forEach(s => {
+          let [imported, local] = s.split('|');
+
+          if (imported === 'default' && i.node.local.name !== local) {
+            throw new Error('Cannot have two default imports!');
+          }
+        });
+        combinedSpecifiers.add(`default|${i.node.local.name}`);
+      })
+      .remove();
+
+    // replace all of the existing specifiers with the new (combined
+    // and uniq'ed) list
     importStatement.get('specifiers').replace(
       Array.from(combinedSpecifiers)
         .sort()
         .map(s => {
-          let parts = s.split('|');
+          let [imported, local] = s.split('|');
 
-          return j.importSpecifier(
-            j.identifier(parts[0]),
-            j.identifier(parts[1])
-          );
+          if (imported === 'default') {
+            return j.importDefaultSpecifier(j.identifier(local));
+          } else {
+            return j.importSpecifier(
+              j.identifier(imported),
+              j.identifier(local)
+            );
+          }
         })
     );
   }
@@ -102,10 +109,12 @@ module.exports = function(file, api) {
     // track and remove specifiers listed in "importsToMigrate"
     imports
       .find(j.ImportSpecifier)
-      .filter(p => importsToMigrate.indexOf(p.node.imported.name) !== -1)
-      .forEach(p =>
-        specifiers.add(`${p.node.imported.name}|${p.node.local.name}`)
-      )
+      .filter(p => importsToMigrate[p.node.imported.name])
+      .forEach(p => {
+        let mappedName = importsToMigrate[p.node.imported.name];
+        let targetSpecifier = `${mappedName}|${p.node.local.name}`;
+        specifiers.add(targetSpecifier);
+      })
       .remove();
 
     // there was nothing to move, bail out...
