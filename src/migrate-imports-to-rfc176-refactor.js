@@ -1,19 +1,10 @@
 'use strict';
 
-/* globals Set */
+/* globals Set, Map */
 
-const importsToMigrate = {
-  loc: 'loc',
-  w: 'w',
-  decamelize: 'decamelize',
-  dasherize: 'dasherize',
-  camelize: 'camelize',
-  classify: 'classify',
-  underscore: 'underscore',
-  capitalize: 'capitalize',
-};
-const fromModule = 'ember-runtime';
-const toModule = '@ember/string';
+const importsToMigrate = new Map([['assign', 'assign']]);
+const fromModule = 'ember-utils';
+const toModule = '@ember/polyfills';
 
 module.exports = function(file, api) {
   const recast = require('recast');
@@ -117,9 +108,9 @@ module.exports = function(file, api) {
     // track and remove specifiers listed in "importsToMigrate"
     imports
       .find(j.ImportSpecifier)
-      .filter(p => importsToMigrate[p.node.imported.name])
+      .filter(p => importsToMigrate.has(p.node.imported.name))
       .forEach(p => {
-        let mappedName = importsToMigrate[p.node.imported.name];
+        let mappedName = importsToMigrate.get(p.node.imported.name);
         let targetSpecifier = `${mappedName}|${p.node.local.name}`;
         specifiers.add(targetSpecifier);
       })
