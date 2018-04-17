@@ -7,11 +7,10 @@ const fromModule = 'ember-utils';
 const toModule = '@ember/polyfills';
 
 module.exports = function(file, api) {
-  const recast = require('recast');
   let parser = require('recast/parsers/typescript');
 
-  const j = api.jscodeshift;
-  const root = j(recast.parse(file.source, { parser }));
+  const j = api.jscodeshift.withParser(parser);
+  const root = j(file.source);
   const printOptions = { quote: 'single', wrapColumn: 100 };
 
   function ensureImport(source, anchor, method) {
